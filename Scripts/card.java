@@ -15,4 +15,8 @@ public class card {
         num = number;
     }
 
+    public card(){
+        num = 0;
+    }
+
 }
