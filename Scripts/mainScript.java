@@ -23,17 +23,12 @@ public class mainScript {
         //Decks Done
         System.out.println("Decks have been generated.");
 
-        /*for (card card1 : shuffler(GameDeck)) {
-            //System.out.println(card1.num);
-        }
-        */
-
         mixAndShuffle();
         PlayerDeck = completeDeck(PlayerDeck);
         CompDeck = completeDeck(CompDeck);
-        
+        System.out.println("Decks have been dealt and are ready to go!");
 
-        System.out.println(PlayerDeck[9].);
+        
 
     }
 
@@ -52,7 +47,7 @@ public class mainScript {
 
                 returnMainDeck[i] = new card(currColorName,"main",true,i%10+1);
 
-                if(((i%10)+1)==0) currColorCount++;
+                if(((i+1)%10)==0) currColorCount++;
             }
 
 
@@ -96,7 +91,6 @@ public class mainScript {
             finalDeck[lastRandom] = cards;
             count--;
         }
-        System.out.println("done");
         return finalDeck;
     }
 
@@ -122,6 +116,7 @@ public class mainScript {
             deck[9] = new card("FLIP",deck[0].deck,true,0);
         }
 
+        deck = finalDeckDealer(deck);
 
         return deck;
     }
@@ -148,6 +143,18 @@ public class mainScript {
         }
         return currColorName;
     }
+
+    public static card[] finalDeckDealer(card[] deck){
+        Random rd = new Random(Calendar.getInstance().getTimeInMillis());
+
+        card[] finalDeck = new card[4];
+        deck = shuffler(deck);
+        for(int i = 0 ; i<4 ; i++)
+        finalDeck[i] = deck[i];
+        
+
+        return finalDeck;
+    } 
 
     
 }
