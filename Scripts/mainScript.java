@@ -10,7 +10,28 @@ public class mainScript {
     public static card[] GameDeck;
     public static card[] PlayerDeck;
     public static card[] CompDeck; 
+
+    public static card[] TablePlayerDeck;
+    public static card[] TableCompDeck;
+
+    public static int scoreComp = 0;
+    public static int scorePlayer = 0;
+
+    public static boolean isPlayersTurn = true;
+
+    
+
+    public static final String ANSI_RESET = "\u001B[0m";
+    public static final String ANSI_BLACK = "\u001B[30m";
+    public static final String ANSI_RED = "\u001B[31m";
+    public static final String ANSI_GREEN = "\u001B[32m";
+    public static final String ANSI_YELLOW = "\u001B[33m";
+    public static final String ANSI_BLUE = "\u001B[34m";
+    public static final String ANSI_PURPLE = "\u001B[35m";
+    public static final String ANSI_CYAN = "\u001B[36m";
+    public static final String ANSI_WHITE = "\u001B[37m";
     public static void main(String[] args){
+
 
         Play();
         
@@ -28,7 +49,10 @@ public class mainScript {
         CompDeck = completeDeck(CompDeck);
         System.out.println("Decks have been dealt and are ready to go!");
 
-        
+        System.out.println("\nGame starts soon! Take a look at your hand:");
+        printStart();
+        System.out.println("\nDon't worry. I will show you your hand in every move.\nBut I am very sorry to tell you that you can't see your opponent's hand. You may have to guess.");
+
 
     }
 
@@ -156,5 +180,33 @@ public class mainScript {
         return finalDeck;
     } 
 
-    
+    public static void printStart(){
+
+        String currTerminalColor = "";
+        for (card c : PlayerDeck) {
+            switch(c.color){
+                case "Red":
+                    currTerminalColor = ANSI_RED;
+                    break;
+                case "Blue":
+                    currTerminalColor = ANSI_BLUE;
+                    break;
+                case "Green":
+                    currTerminalColor = ANSI_GREEN;
+                    break;
+                case "Yellow":
+                    currTerminalColor = ANSI_YELLOW;
+                    break;
+                case "FLIP":
+                case "DOUBLE":
+                    currTerminalColor = ANSI_CYAN;
+                    break;
+            }
+            if(c.num!=0)
+            System.out.print(currTerminalColor + c.num + ANSI_RESET);
+            else if (c.color == "FLIP" || c.color == "DOUBLE")
+            System.out.print(currTerminalColor + c.color + ANSI_RESET);
+            System.out.print(" ");
+        }
+    }
 }
