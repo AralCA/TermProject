@@ -21,7 +21,11 @@ public class mainScript {
 
     public static boolean isPlayersTurn = true;
 
-    
+    public static int turnCount = 1;
+    public static int cardsDrawnPlayer = 0;
+    public static int cardsDrawnComputer = 0;
+    public static int cardsPlayedPlayer = 0;
+    public static int cardsPlayedComp = 0;
 
     public static final String ANSI_RESET = "\u001B[0m";
     public static final String ANSI_BLACK = "\u001B[30m";
@@ -239,17 +243,19 @@ public class mainScript {
     }
 
     public static void printGameTurn(){
-        System.out.print("\033[H\033[2J");
+        //System.out.print("\033[H\033[2J");
         System.out.print("Computer Hand: ");
         printDeck(CompDeck);
-        System.out.print("\nComputer table: \n");
+        System.out.print("\nComputer table: ");
         printDeck(TableCompDeck);
-        System.out.print("Player Hand: ");
+        System.out.print("\nPlayer Hand: ");
         printDeck(PlayerDeck);
         System.out.print("\nPlayer table: ");
         printDeck(TablePlayerDeck);
 
         int playerTableAddUp = 0;
+        int cursor = 0;
+
         for(card card : TablePlayerDeck){
 
             if(card==null)
@@ -272,11 +278,6 @@ public class mainScript {
     public static void GameTurn(){
 
         Scanner sc = new Scanner(System.in);
-        int turnCount = 1;
-        int cardsDrawnPlayer = 0;
-        int cardsDrawnComputer = 0;
-        int cardsPlayedPlayer = 0;
-        int cardsPlayedComp = 0;
 
         TableCompDeck = new card[50];
         TablePlayerDeck = new card[50];
@@ -314,7 +315,6 @@ public class mainScript {
                 case 2:
                     TablePlayerDeck[cardsDrawnPlayer] = GameDeck[cardsDrawnComputer+cardsDrawnPlayer];
                     cardsDrawnPlayer++;
-                    printGameTurn();
                     break;
                 case 3:
                     System.out.println("Which card you want to play? Please state it's place from 1 to 4.");
@@ -327,13 +327,13 @@ public class mainScript {
                     PlayerDeck[playedCardHand-1] = new card();
                     TablePlayerDeck[cardsDrawnPlayer+cardsPlayedPlayer] = playedCard;
                     cardsPlayedPlayer++;
-
-                    printGameTurn();
                     break;
 
             }
 
             bot();
+            printGameTurn();
+            turnCount++;
         }while(true);
     }
 
@@ -374,7 +374,7 @@ public class mainScript {
         int compTableAddUp = 0;
         int cursor = 0;
 
-        for(card card : TablePlayerDeck){
+        for(card card : TableCompDeck){
 
             if(card==null)
             continue;
@@ -389,7 +389,56 @@ public class mainScript {
             
             cursor++;
         }
+
+        System.out.println(compTableAddUp + " COMPDECKADUP");
+
+
+        if(compTableAddUp>=14 && compTableAddUp!=20){
+            card selectedCardToPlay;
+            cursor = 0;
+            int cardCursor = 0;
+            for(card c : CompDeck){
+
+                if(c.color == null)continue;
+
+                int possibleAddUp=compTableAddUp;
+                if(c.color!=null){
+                    if(c.color!="DOUBLE" && c.color!="FLIP"){
+                        possibleAddUp += c.num;
+                    }else if(c.color.equals("DOUBLE")){
+                        possibleAddUp += TableCompDeck[cardsDrawnComputer+cardsPlayedComp-1].num;
+                    }else if(c.color.equals("FLIP")){
+                        possibleAddUp += TableCompDeck[cardsDrawnComputer+cardsPlayedComp-1].num*-1;
+                    }
+                    cursor++;
+                }
+
+                if(possibleAddUp>17 && possibleAddUp<21){
+                    selectedCardToPlay = c;
+                    CompDeck[cardCursor]= new card();
+                    TableCompDeck[cardsDrawnComputer+cardsPlayedComp] = c;
+
+                    if(c.color=="FLIP" || c.color == "DOUBLE"){
+                        System.out.println("WOWWWWWW");
+                    }else System.out.println("PLAYED" + c.num);
+                    cardsPlayedComp++;
+                    break;
+                }
+
+                cardCursor++;
+            }
+
+
+        }else if(compTableAddUp!=20){
+            TableCompDeck[cardsDrawnComputer] = GameDeck[cardsDrawnComputer+cardsDrawnPlayer];
+            cardsDrawnComputer++;
+            printGameTurn();
+        }
         System.out.println("Add Up "  + compTableAddUp);
         
+    }
+
+    public static int deckAddUp(){
+        return 0;
     }
 }
