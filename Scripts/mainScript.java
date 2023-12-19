@@ -157,10 +157,10 @@ public class mainScript {
 
         }
 
-        if(rd.nextInt(5)==0){
+        if(rd.nextInt(2)==0){
             deck[8] = new card("DOUBLE",deck[0].deck,true,0);
         }
-        if(rd.nextInt(5)==0){
+        if(rd.nextInt(2)==0){
             deck[9] = new card("FLIP",deck[0].deck,true,0);
         }
 
@@ -282,7 +282,7 @@ public class mainScript {
         TableCompDeck = new card[50];
         TablePlayerDeck = new card[50];
 
-        boolean isOnStand = false;
+        boolean isPlayerOnStand = false;
 
         card playedCard = new card();
 
@@ -300,7 +300,7 @@ public class mainScript {
 
             int move = 0;
 
-            if(!isOnStand){
+            if(!isPlayerOnStand){
                 System.out.println("\nStand[1], Draw[2], Play From Hand[3]");
                 move = sc.nextInt();
             }else{
@@ -310,7 +310,7 @@ public class mainScript {
 
             switch(move){
                 case 1:
-                    isOnStand = true;
+                    isPlayerOnStand = true;
                     break;
                 case 2:
                     TablePlayerDeck[cardsDrawnPlayer] = GameDeck[cardsDrawnComputer+cardsDrawnPlayer];
@@ -331,9 +331,39 @@ public class mainScript {
 
             }
 
-            bot();
+            int playerTableAddUp = 0;
+            int cursor = 0;
+            boolean isThereAnyNegative = false;
+
+            for(card card : TablePlayerDeck){
+                if(card==null)
+                continue;
+
+                if(card.color!="DOUBLE" && card.color!="FLIP"){
+                    playerTableAddUp += card.num;
+                    if(card.isPositive==false)isThereAnyNegative=true;
+                }else if(card.color.equals("DOUBLE")){
+                    playerTableAddUp += TablePlayerDeck[cursor-1].num;
+                }else if(card.color.equals("FLIP")){
+                    playerTableAddUp += TablePlayerDeck[cursor-1].num*-1;
+            }
+            cursor++;
+            }
+
+            boolean goNextRoundPlayer = false;
+
+            System.out.println("Is there any negative" + " " + isThereAnyNegative);
+
+            if(!isThereAnyNegative && playerTableAddUp>20) goNextRoundPlayer = true;
+
+            boolean goNextRoundBot = !bot();
             printGameTurn();
             turnCount++;
+
+            if(goNextRoundBot && goNextRoundPlayer) System.out.println("ITS OVER");
+            else{
+                System.out.println(goNextRoundBot + " " +goNextRoundPlayer);
+            }
         }while(true);
     }
 
@@ -369,76 +399,107 @@ public class mainScript {
             System.out.print(currTerminalColor + card.color + ANSI_RESET);
     }
 
-    public static void bot(){
-        int flexibleOnPlay = round;
+    public static boolean bot(){
+        System.out.println(round + " round");
+        boolean onStand = false;
+        boolean canPlayCard = true;
         int compTableAddUp = 0;
         int cursor = 0;
+
+
+        int activeCards = 0;
+        for(card c : CompDeck){
+            if(c.color!= null) activeCards++;
+
+        }
+
+        if(activeCards-(3-round) <1) canPlayCard = false;
 
         for(card card : TableCompDeck){
 
             if(card==null)
             continue;
 
+
             if(card.color!="DOUBLE" && card.color!="FLIP"){
                 compTableAddUp += card.num;
             }else if(card.color.equals("DOUBLE")){
-                compTableAddUp += TablePlayerDeck[cursor-1].num;
+                compTableAddUp += TableCompDeck[cursor-1].num;
             }else if(card.color.equals("FLIP")){
-                compTableAddUp += TablePlayerDeck[cursor-1].num*-1;
+                compTableAddUp += TableCompDeck[cursor-1].num*-1;
             }
             
             cursor++;
         }
 
-        System.out.println(compTableAddUp + " COMPDECKADUP");
+        if(compTableAddUp==20) return false;
 
+        if(compTableAddUp>=14){
 
-        if(compTableAddUp>=14 && compTableAddUp!=20){
+            Boolean isAnyCardPlayed = false;
+
             card selectedCardToPlay;
             cursor = 0;
             int cardCursor = 0;
             for(card c : CompDeck){
-
-                if(c.color == null)continue;
-
+                if(c.color == null){
+                    cardCursor++;
+                    continue;
+                }
                 int possibleAddUp=compTableAddUp;
                 if(c.color!=null){
+
                     if(c.color!="DOUBLE" && c.color!="FLIP"){
                         possibleAddUp += c.num;
                     }else if(c.color.equals("DOUBLE")){
                         possibleAddUp += TableCompDeck[cardsDrawnComputer+cardsPlayedComp-1].num;
                     }else if(c.color.equals("FLIP")){
-                        possibleAddUp += TableCompDeck[cardsDrawnComputer+cardsPlayedComp-1].num*-1;
+                        possibleAddUp += TableCompDeck[cardsDrawnComputer+cardsPlayedComp-1].num*-2;
                     }
                     cursor++;
                 }
-
-                if(possibleAddUp>17 && possibleAddUp<21){
+                if((possibleAddUp>compTableAddUp && possibleAddUp<21 && compTableAddUp<18 && canPlayCard) || riskFactor(round, possibleAddUp)){
                     selectedCardToPlay = c;
                     CompDeck[cardCursor]= new card();
                     TableCompDeck[cardsDrawnComputer+cardsPlayedComp] = c;
-
-                    if(c.color=="FLIP" || c.color == "DOUBLE"){
-                        System.out.println("WOWWWWWW");
-                    }else System.out.println("PLAYED" + c.num);
                     cardsPlayedComp++;
+                    isAnyCardPlayed= true;
+                    System.out.println("Comp played card in 17 21");
                     break;
-                }
-
+                }else if((possibleAddUp<21 && compTableAddUp>20 && canPlayCard) || riskFactor(round, possibleAddUp)){
+                    selectedCardToPlay = c;
+                    CompDeck[cardCursor]= new card();
+                    TableCompDeck[cardsDrawnComputer+cardsPlayedComp] = c;
+                    cardsPlayedComp++;
+                    isAnyCardPlayed= true;
+                    System.out.println("Comp played card in 21 20 15");
+                    break;
+                }else onStand = true;
                 cardCursor++;
             }
-
-
-        }else if(compTableAddUp!=20){
-            TableCompDeck[cardsDrawnComputer] = GameDeck[cardsDrawnComputer+cardsDrawnPlayer];
+            if(!isAnyCardPlayed){
+                System.out.println("No card Played");
+                onStand = true;
+            }
+        }else if(compTableAddUp<14){
+            System.out.println("Comp drawn card from game deck");
+            TableCompDeck[cardsDrawnComputer+cardsPlayedComp] = GameDeck[cardsDrawnComputer+cardsDrawnPlayer];
             cardsDrawnComputer++;
             printGameTurn();
         }
-        System.out.println("Add Up "  + compTableAddUp);
         
+        System.out.println(compTableAddUp);
+        
+        if(onStand) return false;
+        else return true;
     }
 
     public static int deckAddUp(){
         return 0;
+    }
+
+    public static boolean riskFactor(int round, int possAddUp){
+        if((18-round)<possAddUp && possAddUp<21) return true;
+        else return false; 
     }
 }
